@@ -92,11 +92,38 @@ class DAG(object):
                     edges.remove(old_task_name)
                     edges.add(new_task_name)
 
+    @staticmethod
+    def _predecessors(node, graph):
+        return [key for key in graph if node in graph[key]]
+
     def predecessors(self, node, graph=None):
         """ Returns a list of all predecessors of the given node """
         if graph is None:
             graph = self.graph
-        return [key for key in graph if node in graph[key]]
+
+        return DAG._predecessors(node, graph)
+
+    @staticmethod
+    def _all_predecessors(node, graph):
+        if node not in graph:
+            raise KeyError('node %s is not in graph' % node)
+
+        preds = DAG._predecessors(node, graph)
+
+        grands = [grand for p in preds for grand in DAG._all_predecessors(p, graph)]
+
+        return preds + grands
+
+    def all_predecessors(self, node, graph=None, sort=False):
+        if graph is None:
+            graph = self.graph
+
+        all_preds = set(DAG._all_predecessors(node, graph))
+
+        if sort:
+            return filter(lambda n: n in all_preds, self.topological_sort(graph=graph))
+        else:
+            return list(all_preds)
 
     def downstream(self, node, graph=None):
         """ Returns a list of all nodes this node has edges towards. """
