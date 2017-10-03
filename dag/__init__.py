@@ -16,8 +16,6 @@ class DAG(object):
 
     def __init__(self, graph_dict=None):
         """ Construct a new DAG with no nodes or edges. """
-        self.reset_graph()
-
         if graph_dict is None:
             graph_dict = {}
 
